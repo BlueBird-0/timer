@@ -1,5 +1,6 @@
 package com.example.todolist
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.design.widget.Snackbar
@@ -28,6 +29,9 @@ class MainActivity : AppCompatActivity() {
                 timer.setText("done!");
             }
         }.start()
+
+        val intent = Intent(this,CalendarActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
