@@ -17,9 +17,7 @@ class CalendarActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calendar)
-
-
-//        toolbar.setTitle("8월")
+        toolbar.setTitle("")
         setSupportActionBar(toolbar)
 
 
