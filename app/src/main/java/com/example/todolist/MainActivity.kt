@@ -19,7 +19,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 import android.content.IntentFilter
 import android.content.BroadcastReceiver
-
+import android.view.View
 
 
 class MainActivity : AppCompatActivity() {
@@ -46,6 +46,11 @@ class MainActivity : AppCompatActivity() {
         //블루투스 연결
         bluetoothConnection()
         bluetoothPareing()
+
+        fffff.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this,Alarm::class.java)
+            startActivity(intent)
+        })
     }
 
     fun bluetoothConnection() {

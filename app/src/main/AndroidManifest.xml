@@ -19,9 +19,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
+         <receiver android:name=".AlarmBroadcastReceiver" />
         <activity
                 android:name=".CalendarActivity"
+                android:label="@string/app_name"
+                android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+                android:name=".Alarm"
                 android:label="@string/app_name"
                 android:theme="@style/AppTheme.NoActionBar"/>
     </application>
