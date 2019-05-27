@@ -65,5 +65,13 @@
             android:id="@+id/Blue" app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" android:layout_marginTop="121dp"
             app:layout_constraintTop_toBottomOf="@+id/timer"/>
+    <Button
+            android:text="Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/server"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/Blue" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" tools:text="server"/>
 
 </android.support.constraint.ConstraintLayout>

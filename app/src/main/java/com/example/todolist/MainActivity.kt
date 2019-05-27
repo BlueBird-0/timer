@@ -1,10 +1,7 @@
 package com.example.todolist
 
-import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.content.Context
-import android.content.Intent
+import android.bluetooth.*
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -17,18 +14,51 @@ import android.view.WindowManager
 
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
-import android.content.IntentFilter
-import android.content.BroadcastReceiver
-
+import android.support.v4.app.FragmentActivity
+import android.provider.Browser.sendString
+import android.support.v7.app.AlertDialog
+import android.view.View
+import android.widget.Toast
+import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
+    var socket : BluetoothSocket ?= null
+    var mReceiver : BroadcastReceiver? = null
+    var bluetoothAdapter : BluetoothAdapter ?= null
+    private val MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+    var bluetooth : Bluetooth = Bluetooth()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         toolbar.setTitle("")
         setSupportActionBar(toolbar)
+
+        var intentfilter: IntentFilter = IntentFilter()
+        intentfilter.addAction("com.example.todolist.SEND_BROAD_CAST")
+        Log.d("test001", "tttttt")
+        var mReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                val sendString = intent?.getStringExtra("sendString")
+                Log.d("test001", sendString)
+                val toast = Toast.makeText(getApplicationContext(), "qnldknqwwdqnlk", Toast.LENGTH_LONG).show()
+            }
+        }
+        Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state);
+
+        registerReceiver(mReceiver, intentfilter)
+
+
+        val sendIntent = Intent("com.example.todolist.SEND_BROAD_CAST")
+        sendIntent.putExtra ("isBoolean", true)
+        sendIntent.putExtra("sendInteger", 123)
+        sendIntent.putExtra("sendString", "Intent String")
+        sendBroadcast(sendIntent)
+
 
         val count = object : CountDownTimer(1000000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -43,24 +73,74 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this,CalendarActivity::class.java)
         //startActivity(intent)
 
+
+
+
         //블루투스 연결
         bluetoothConnection()
-        bluetoothPareing()
+
+
+        Blue.setOnClickListener(View.OnClickListener {
+            connect()
+        })
+        server.setOnClickListener(View.OnClickListener {
+            Log.d("test001", "call - createServer");
+            createServer()
+        })
+    }
+
+
+    fun createServer(){
+        Thread({
+            var bluetoothServerSocket : BluetoothServerSocket
+
+            var secure : Boolean = true
+            var mSocketType = if (secure) "Secure" else "Insecure"
+            if(secure)
+                bluetoothServerSocket = bluetoothAdapter!!.listenUsingInsecureRfcommWithServiceRecord("name", MY_UUID_SECURE)
+            else
+                bluetoothServerSocket = bluetoothAdapter!!.listenUsingRfcommWithServiceRecord("name", MY_UUID_SECURE)
+
+            Log.d("test001", "accpt ready")
+            socket = bluetoothServerSocket.accept()
+            Log.d("test001", "Good")
+
+            try {
+                Log.d("test001", "try Connect")
+                socket?.connect()
+            }catch (e:Exception){
+                Log.d("test001", e.printStackTrace().toString())
+            }
+            Log.d("test001", "connectSuccess")
+
+
+            socket?.close()
+            Log.d("test001", "successed")
+        }).start()
+    }
+
+    override fun unregisterReceiver(receiver: BroadcastReceiver?) {
+        super.unregisterReceiver(mReceiver)
+
+    }
+
+    fun connect() {
+        socket?.connect()
     }
 
     fun bluetoothConnection() {
         //블루투스 연결
-        var bluetoothAdapter : BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if(bluetoothAdapter == null) {
             Log.d("test001", "Device does not support BlueTooth")
         }
-        if(!bluetoothAdapter.isEnabled()){
+        if(!bluetoothAdapter!!.isEnabled){
             val intent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(intent, RESULT_OK) // what is requestCode?
         }
 
         //기기 연결
-        var pairedDevices : Set<BluetoothDevice> = bluetoothAdapter.bondedDevices
+        var pairedDevices : Set<BluetoothDevice> = bluetoothAdapter!!.bondedDevices
         var arrayAdapter = ArrayList<String>()
         if(pairedDevices.size > 0) {
             for(device in pairedDevices) {
