@@ -22,6 +22,7 @@ import android.widget.Toast
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
+import java.nio.charset.Charset
 
 
 class MainActivity : AppCompatActivity() {
@@ -29,8 +30,7 @@ class MainActivity : AppCompatActivity() {
     var mReceiver : BroadcastReceiver? = null
     var bluetoothAdapter : BluetoothAdapter ?= null
     private val MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
-    var bluetooth : Bluetooth = Bluetooth()
-
+    var mBtSocket : BluetoothSocket? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,13 +140,62 @@ class MainActivity : AppCompatActivity() {
         }
 
         //기기 연결
+        Log.d("test001", "기기 연결 해볼까?");
         var pairedDevices : Set<BluetoothDevice> = bluetoothAdapter!!.bondedDevices
         var arrayAdapter = ArrayList<String>()
         if(pairedDevices.size > 0) {
+            Log.d("test001", "if문에 걸렸어");
             for(device in pairedDevices) {
                 arrayAdapter.add(device.name+ "\n"+device.address)
             }
         }
+        for(adapter in arrayAdapter)
+            Log.d("test001", adapter);
+
+        try{
+            bluetoothAdapter!!.startDiscovery()
+            var heroDevice = bluetoothAdapter!!.getRemoteDevice("B8:27:EB:5F:37:48")
+            mBtSocket = heroDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
+        } catch(e : Exception) {
+            e.printStackTrace();
+            Log.d("test001", "아 여기도 에러가 떳어요 : "+e.printStackTrace())
+        }
+        Thread(Runnable {
+            try {
+
+                // 소켓을 연결한다
+
+                mBtSocket?.connect()
+
+                // 입출력을 위한 스트림 오브젝트를 얻는다
+
+                var mInput = mBtSocket?.getInputStream()
+
+                var mOutput = mBtSocket?.getOutputStream()
+
+                while (true) {
+
+                    mOutput?.writer(charset("Can you Speak KOR?"))
+                    // 입력 데이터를 그대로 출력한다
+                    mOutput?.write(mInput!!.read())
+
+                }
+
+            } catch (e: Exception) {
+                Log.d("test001", "에러 또떠 ")
+                e.printStackTrace()
+
+            }
+        }).start()
+
+
+
+
+
+
+
+
+
 
         // Create a BroadcastReceiver for ACTION_FOUND
         val mReceiver = object : BroadcastReceiver() {
