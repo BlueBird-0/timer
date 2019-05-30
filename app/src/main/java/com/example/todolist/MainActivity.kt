@@ -1,10 +1,12 @@
 package com.example.todolist
 
+import android.app.ListActivity
 import android.bluetooth.*
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log
@@ -23,7 +25,15 @@ import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
 import java.nio.charset.Charset
+import android.bluetooth.BluetoothSocket
 
+
+
+
+
+
+
+private const val SCAN_PERIOD : Long = 10000
 
 class MainActivity : AppCompatActivity() {
     var socket : BluetoothSocket ?= null
@@ -31,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     var bluetoothAdapter : BluetoothAdapter ?= null
     private val MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     var mBtSocket : BluetoothSocket? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,7 +136,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun connect() {
-        socket?.connect()
+        //socket?.connect()
+    }
+
+    fun findBLEDevice() {
     }
 
     fun bluetoothConnection() {
@@ -156,6 +170,9 @@ class MainActivity : AppCompatActivity() {
             bluetoothAdapter!!.startDiscovery()
             var heroDevice = bluetoothAdapter!!.getRemoteDevice("B8:27:EB:5F:37:48")
             mBtSocket = heroDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
+            mBtSocket =
+                heroDevice.javaClass.getMethod("createRfcommSocket", *arrayOf<Class<*>>(Int::class.javaPrimitiveType!!))
+                    .invoke(heroDevice, 1) as BluetoothSocket
         } catch(e : Exception) {
             e.printStackTrace();
             Log.d("test001", "아 여기도 에러가 떳어요 : "+e.printStackTrace())
@@ -163,10 +180,10 @@ class MainActivity : AppCompatActivity() {
         Thread(Runnable {
             try {
 
-                // 소켓을 연결한다
-
+                // 소켓을 연결한다.
                 mBtSocket?.connect()
 
+                Thread.sleep(2000);
                 // 입출력을 위한 스트림 오브젝트를 얻는다
 
                 var mInput = mBtSocket?.getInputStream()
@@ -174,11 +191,10 @@ class MainActivity : AppCompatActivity() {
                 var mOutput = mBtSocket?.getOutputStream()
 
                 while (true) {
-
-                    mOutput?.writer(charset("Can you Speak KOR?"))
+                    //mOutput?.writer(charset("CanyouSpeakKOR?"))
                     // 입력 데이터를 그대로 출력한다
-                    mOutput?.write(mInput!!.read())
-
+                    //mOutput?.write(mInput!!.read())
+                    mOutput?.write(("HelloWorld!").toByteArray())
                 }
 
             } catch (e: Exception) {
