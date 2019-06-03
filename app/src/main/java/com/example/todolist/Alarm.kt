@@ -12,7 +12,9 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import kotlinx.android.synthetic.main.content_alarm.*
+import java.lang.reflect.Array.set
 import java.util.*
+import java.util.Calendar
 
 class Alarm : AppCompatActivity() {
 

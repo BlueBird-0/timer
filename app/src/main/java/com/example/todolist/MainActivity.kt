@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
 
-        val intent = Intent(this,CalendarActivity::class.java)
+        //val intent = Intent(this,CalendarActivity::class.java)
         //startActivity(intent)
 
 
@@ -181,9 +181,10 @@ class MainActivity : AppCompatActivity() {
             try {
 
                 // 소켓을 연결한다.
+                Log.d("test001", "연결 중");
                 mBtSocket?.connect()
-
-                Thread.sleep(2000);
+                Log.d("test001", "연결 완료");
+                //Thread.sleep(2000);
                 // 입출력을 위한 스트림 오브젝트를 얻는다
 
                 var mInput = mBtSocket?.getInputStream()
@@ -194,7 +195,16 @@ class MainActivity : AppCompatActivity() {
                     //mOutput?.writer(charset("CanyouSpeakKOR?"))
                     // 입력 데이터를 그대로 출력한다
                     //mOutput?.write(mInput!!.read())
-                    mOutput?.write(("HelloWorld!").toByteArray())
+                    mOutput?.write(("time\n").toByteArray())
+                    Log.d("test001", "데이터 보냄");
+                    Thread.sleep(3000)
+                    mOutput?.write(("print\n").toByteArray())
+                    Log.d("test001", "데이터 보냄");
+                    Thread.sleep(3000)
+                    mOutput?.write(("q").toByteArray())
+                    Log.d("test001", "데이터 보냄");
+                    Thread.sleep(3000)
+                    break;
                 }
 
             } catch (e: Exception) {
