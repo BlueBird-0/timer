@@ -54,27 +54,35 @@ class MainActivity : AppCompatActivity() {
         toolbar.setTitle("")
         setSupportActionBar(toolbar)
 
-        var intentfilter: IntentFilter = IntentFilter()
-        intentfilter.addAction("com.example.todolist.SEND_BROAD_CAST")
-        Log.d("test001", "tttttt")
+//        var intentfilter: IntentFilter = IntentFilter()
+//        intentfilter.addAction("com.example.todolist.SEND_BROAD_CAST")
         var mReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val sendString = intent?.getStringExtra("sendString")
-                Log.d("test001", sendString)
-                val toast = Toast.makeText(getApplicationContext(), "qnldknqwwdqnlk", Toast.LENGTH_LONG).show()
+                //val sendString = intent?.getStringExtra("sendString")
+                //Log.d("test001", sendString)
+                val toast = Toast.makeText(getApplicationContext(), "리시버 실행", Toast.LENGTH_LONG).show()
+
+                var action = intent?.action
+                Log.d("test001", "리시버 실행 (action):"+intent?.action)
+                if(BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    var device = intent?.getParcelableArrayExtra(BluetoothDevice.EXTRA_DEVICE)
+                    var rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                    Log.d("test001", "여기서 RSSI 등장!! " +rssi)
+                }
             }
         }
         Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state);
 
-        registerReceiver(mReceiver, intentfilter)
+//        registerReceiver(mReceiver, intentfilter)
+        registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
 
-
+/*
         val sendIntent = Intent("com.example.todolist.SEND_BROAD_CAST")
         sendIntent.putExtra ("isBoolean", true)
         sendIntent.putExtra("sendInteger", 123)
         sendIntent.putExtra("sendString", "Intent String")
         sendBroadcast(sendIntent)
-
+*/
 
         val count = object : CountDownTimer(1000000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -87,7 +95,7 @@ class MainActivity : AppCompatActivity() {
         }.start()
 
         val intent = Intent(this,CalendarActivity::class.java)
-        startActivity(intent)
+        //startActivity(intent)
 
         Log.d("test001", "와ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ");
 
@@ -96,16 +104,14 @@ class MainActivity : AppCompatActivity() {
         //블루투스 연결
         bluetoothConnection()
 
-
         Blue.setOnClickListener(View.OnClickListener {
-            connect()
+            bluetoothAdapter?.startDiscovery();
         })
         server.setOnClickListener(View.OnClickListener {
             Log.d("test001", "call - createServer");
             createServer()
         })
     }
-
 
     fun createServer(){
         Thread({
@@ -136,17 +142,6 @@ class MainActivity : AppCompatActivity() {
         }).start()
     }
 
-    override fun unregisterReceiver(receiver: BroadcastReceiver?) {
-        super.unregisterReceiver(mReceiver)
-
-    }
-
-    fun connect() {
-        //socket?.connect()
-    }
-
-    fun findBLEDevice() {
-    }
 
     fun bluetoothConnection() {
         //블루투스 연결
@@ -204,6 +199,13 @@ class MainActivity : AppCompatActivity() {
                     // 입력 데이터를 그대로 출력한다
                     //mOutput?.write(mInput!!.read())
 
+
+                    val sendIntent = Intent("com.example.todolist.SEND_BROAD_CAST")
+
+                    // Register the BroadcastReceiver
+
+
+
                     mOutput?.write(("r\n").toByteArray())
                     Log.d("test001", "데이터 보냄");
                     Log.d("test001", "데이터 받음"+ mInput?.read());
@@ -258,6 +260,20 @@ class MainActivity : AppCompatActivity() {
         // Register the BroadcastReceiver
         val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
         registerReceiver(mReceiver, filter) // Don't forget to unregister during onDestroy
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //registerReceiver()
+    }
+
+    fun registerReceiver() {
+        //if()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //unregisterReceiver()
     }
 
     fun bluetoothPareing() {
