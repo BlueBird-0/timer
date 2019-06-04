@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:agendaCalendar="http://schemas.android.com/tools"
               android:id="@+id/linearLayout"
               android:orientation="vertical"
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-tools:context="com.example.todolist.CalendarActivity"
-              >
-    <CalendarView
+>
+    <Button
+            android:text="Button"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:id="@+id/calendar"/>
+            android:layout_height="wrap_content" android:id="@+id/button"/>
+
+
+    <com.applikeysolutions.cosmocalendar.view.CalendarView
+            android:id="@+id/calendar_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/ll_settings"/>
 </LinearLayout>

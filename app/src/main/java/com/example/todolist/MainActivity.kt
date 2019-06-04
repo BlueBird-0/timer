@@ -26,6 +26,11 @@ import java.util.*
 import kotlin.collections.ArrayList
 import java.nio.charset.Charset
 import android.bluetooth.BluetoothSocket
+import android.bluetooth.BluetoothGatt
+import android.bluetooth.BluetoothGattCallback
+import android.bluetooth.BluetoothDevice
+
+
 
 
 
@@ -34,8 +39,8 @@ import android.bluetooth.BluetoothSocket
 
 
 private const val SCAN_PERIOD : Long = 10000
-
 class MainActivity : AppCompatActivity() {
+
     var socket : BluetoothSocket ?= null
     var mReceiver : BroadcastReceiver? = null
     var bluetoothAdapter : BluetoothAdapter ?= null
@@ -81,9 +86,10 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
 
-        //val intent = Intent(this,CalendarActivity::class.java)
-        //startActivity(intent)
+        val intent = Intent(this,CalendarActivity::class.java)
+        startActivity(intent)
 
+        Log.d("test001", "와ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ");
 
 
 
@@ -173,6 +179,8 @@ class MainActivity : AppCompatActivity() {
             mBtSocket =
                 heroDevice.javaClass.getMethod("createRfcommSocket", *arrayOf<Class<*>>(Int::class.javaPrimitiveType!!))
                     .invoke(heroDevice, 1) as BluetoothSocket
+
+
         } catch(e : Exception) {
             e.printStackTrace();
             Log.d("test001", "아 여기도 에러가 떳어요 : "+e.printStackTrace())
@@ -195,6 +203,11 @@ class MainActivity : AppCompatActivity() {
                     //mOutput?.writer(charset("CanyouSpeakKOR?"))
                     // 입력 데이터를 그대로 출력한다
                     //mOutput?.write(mInput!!.read())
+
+                    mOutput?.write(("r\n").toByteArray())
+                    Log.d("test001", "데이터 보냄");
+                    Log.d("test001", "데이터 받음"+ mInput?.read());
+                    Thread.sleep(3000)
                     mOutput?.write(("time\n").toByteArray())
                     Log.d("test001", "데이터 보냄");
                     Thread.sleep(3000)
@@ -204,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                     mOutput?.write(("q").toByteArray())
                     Log.d("test001", "데이터 보냄");
                     Thread.sleep(3000)
+
                     break;
                 }
 
@@ -229,6 +243,11 @@ class MainActivity : AppCompatActivity() {
                 val action = intent.action
                 // When discovery finds a device
                 if (BluetoothDevice.ACTION_FOUND == action) {
+                    //거리 측정
+                    var rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                    Toast.makeText(applicationContext, "RSSI: "+ rssi + "dBm", Toast.LENGTH_SHORT).show()
+
+
                     // Get the BluetoothDevice object from the Intent
                     val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                     // Add the name and address to an array adapter to show in a ListView
