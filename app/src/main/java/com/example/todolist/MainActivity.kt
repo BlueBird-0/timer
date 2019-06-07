@@ -29,13 +29,7 @@ import android.bluetooth.BluetoothSocket
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothDevice
-
-
-
-
-
-
-
+import kotlin.concurrent.schedule
 
 
 private const val SCAN_PERIOD : Long = 10000
@@ -46,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     var bluetoothAdapter : BluetoothAdapter ?= null
     private val MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     var mBtSocket : BluetoothSocket? = null
-
+    var distanceTimer : TimerTask ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,35 +48,33 @@ class MainActivity : AppCompatActivity() {
         toolbar.setTitle("")
         setSupportActionBar(toolbar)
 
-//        var intentfilter: IntentFilter = IntentFilter()
-//        intentfilter.addAction("com.example.todolist.SEND_BROAD_CAST")
+        var receive_check : Boolean = false
         var mReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 //val sendString = intent?.getStringExtra("sendString")
                 //Log.d("test001", sendString)
-                val toast = Toast.makeText(getApplicationContext(), "리시버 실행", Toast.LENGTH_LONG).show()
+                //val toast = Toast.makeText(applicationContext, "리시버 실행", Toast.LENGTH_LONG).show()
 
-                var action = intent?.action
+                val action = intent?.action
+                var rssi : Short
                 Log.d("test001", "리시버 실행 (action):"+intent?.action)
                 if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    var device = intent?.getParcelableArrayExtra(BluetoothDevice.EXTRA_DEVICE)
-                    var rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
-                    Log.d("test001", "여기서 RSSI 등장!! " +rssi)
+                    //var device = intent?.getParcelableArrayExtra(BluetoothDevice.EXTRA_DEVICE)
+                    val device :BluetoothDevice? = intent?.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    if(device?.name.equals("raspberrypi")) {
+                        rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                        Log.d("test001", "장치이름 : " + device?.name + " RSSI : " + rssi)
+                        distance.setText("거리 : "+rssi)
+
+                        distanceCheck()
+                    }
+
                 }
             }
         }
         Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state);
 
-//        registerReceiver(mReceiver, intentfilter)
         registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
-
-/*
-        val sendIntent = Intent("com.example.todolist.SEND_BROAD_CAST")
-        sendIntent.putExtra ("isBoolean", true)
-        sendIntent.putExtra("sendInteger", 123)
-        sendIntent.putExtra("sendString", "Intent String")
-        sendBroadcast(sendIntent)
-*/
 
         val count = object : CountDownTimer(1000000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -105,12 +97,33 @@ class MainActivity : AppCompatActivity() {
         bluetoothConnection()
 
         Blue.setOnClickListener(View.OnClickListener {
+            Log.d("test001", "BLUE 버튼 클릭1");
+            if (bluetoothAdapter?.isDiscovering == true) {
+                bluetoothAdapter?.cancelDiscovery();
+                Log.d("test001", "BLUE 버튼 클릭2");
+            }
             bluetoothAdapter?.startDiscovery();
+            Log.d("test001", "BLUE 버튼 클릭3");
         })
         server.setOnClickListener(View.OnClickListener {
             Log.d("test001", "call - createServer");
             createServer()
         })
+    }
+
+    fun distanceCheck(){
+        distanceTimer?.cancel()
+        distanceTimer = Timer("DistanceCheckTimer", false).schedule(10000){
+            Log.d("test001", "timer start!!!");
+            distanceCheck()
+        }
+
+        //블루투스 검색 시작
+        if (bluetoothAdapter?.isDiscovering == true) {
+            bluetoothAdapter?.cancelDiscovery();
+            Log.d("test001", "다시 검색");
+        }
+        bluetoothAdapter?.startDiscovery();
     }
 
     fun createServer(){
@@ -216,9 +229,9 @@ class MainActivity : AppCompatActivity() {
                     mOutput?.write(("print\n").toByteArray())
                     Log.d("test001", "데이터 보냄");
                     Thread.sleep(3000)
-                    mOutput?.write(("q").toByteArray())
-                    Log.d("test001", "데이터 보냄");
-                    Thread.sleep(3000)
+                    //mOutput?.write(("q").toByteArray())
+                    //Log.d("test001", "데이터 보냄");
+                    //Thread.sleep(3000)
 
                     break;
                 }
@@ -231,52 +244,22 @@ class MainActivity : AppCompatActivity() {
         }).start()
 
 
-
-
-
-
-
-
-
-
-        // Create a BroadcastReceiver for ACTION_FOUND
-        val mReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.action
-                // When discovery finds a device
-                if (BluetoothDevice.ACTION_FOUND == action) {
-                    //거리 측정
-                    var rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
-                    Toast.makeText(applicationContext, "RSSI: "+ rssi + "dBm", Toast.LENGTH_SHORT).show()
-
-
-                    // Get the BluetoothDevice object from the Intent
-                    val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                    // Add the name and address to an array adapter to show in a ListView
-                    arrayAdapter.add(device.name + "\n" + device.address)
+        //거리 재는 스레드
+        /*
+        Thread(Runnable {
+            while(true){
+                if (bluetoothAdapter?.isDiscovering == true) {
+                    bluetoothAdapter?.cancelDiscovery();
+                    Log.d("test001", "BLUE 버튼 클릭 2-1");
                 }
+                bluetoothAdapter?.startDiscovery();
+                Thread.sleep(5000)
             }
-        }
-        // Register the BroadcastReceiver
-        val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(mReceiver, filter) // Don't forget to unregister during onDestroy
+        }).start()
+        */
     }
 
-    override fun onResume() {
-        super.onResume()
-        //registerReceiver()
-    }
-
-    fun registerReceiver() {
-        //if()
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //unregisterReceiver()
-    }
-
-    fun bluetoothPareing() {
+    fun distanse(){
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

@@ -3,6 +3,10 @@
           package="com.example.todolist">
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.BROADCAST_INTENT_ACTION"/>
+
+
     <uses-feature android:name = "android.hardware.bluetooth_le" android:required = "true"/>
     <application
             android:allowBackup="true"
@@ -31,8 +35,6 @@
                 android:name=".CalendarActivity"
                 android:label="ToDoList"
                 android:theme="@style/AppTheme.NoActionBar"/>
-
-
     </application>
 
 </manifest>
