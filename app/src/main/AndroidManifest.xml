@@ -35,6 +35,11 @@
                 android:name=".CalendarActivity"
                 android:label="ToDoList"
                 android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+                android:name=".TimeRecord"
+                android:label="ToDoList"
+                android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

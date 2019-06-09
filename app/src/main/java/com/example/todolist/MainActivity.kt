@@ -29,6 +29,8 @@ import android.bluetooth.BluetoothSocket
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothDevice
+import java.io.InputStream
+import java.io.OutputStream
 import kotlin.concurrent.schedule
 
 
@@ -36,10 +38,12 @@ private const val SCAN_PERIOD : Long = 10000
 class MainActivity : AppCompatActivity() {
 
     var socket : BluetoothSocket ?= null
-    var mReceiver : BroadcastReceiver? = null
     var bluetoothAdapter : BluetoothAdapter ?= null
     private val MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     var mBtSocket : BluetoothSocket? = null
+    var mOutput : OutputStream? = null
+    var mInput : InputStream?= null
+
     var distanceTimer : TimerTask ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +52,7 @@ class MainActivity : AppCompatActivity() {
         toolbar.setTitle("")
         setSupportActionBar(toolbar)
 
-        var receive_check : Boolean = false
-        var mReceiver = object : BroadcastReceiver() {
+        val mReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 //val sendString = intent?.getStringExtra("sendString")
                 //Log.d("test001", sendString)
@@ -65,6 +68,9 @@ class MainActivity : AppCompatActivity() {
                         rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
                         Log.d("test001", "장치이름 : " + device?.name + " RSSI : " + rssi)
                         distance.setText("거리 : "+rssi)
+
+                        //거리 데이터 보내기
+                        mOutput?.write(("rssi\n"+rssi+"\n").toByteArray())
 
                         distanceCheck()
                     }
@@ -86,13 +92,6 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
 
-        val intent = Intent(this,CalendarActivity::class.java)
-        //startActivity(intent)
-
-        Log.d("test001", "와ㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏㅏ");
-
-
-
         //블루투스 연결
         bluetoothConnection()
 
@@ -105,14 +104,18 @@ class MainActivity : AppCompatActivity() {
             bluetoothAdapter?.startDiscovery();
             Log.d("test001", "BLUE 버튼 클릭3");
         })
-        server.setOnClickListener(View.OnClickListener {
-            Log.d("test001", "call - createServer");
-            createServer()
+
+
+
+        btn_calendar.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this,TimeRecord::class.java)
+            startActivity(intent)
         })
     }
 
     fun distanceCheck(){
         distanceTimer?.cancel()
+        //10초가 지나면 자동으로 다시 검색
         distanceTimer = Timer("DistanceCheckTimer", false).schedule(10000){
             Log.d("test001", "timer start!!!");
             distanceCheck()
@@ -203,9 +206,9 @@ class MainActivity : AppCompatActivity() {
                 //Thread.sleep(2000);
                 // 입출력을 위한 스트림 오브젝트를 얻는다
 
-                var mInput = mBtSocket?.getInputStream()
+                mInput = mBtSocket?.getInputStream()
 
-                var mOutput = mBtSocket?.getOutputStream()
+                mOutput = mBtSocket?.getOutputStream()
 
                 while (true) {
                     //mOutput?.writer(charset("CanyouSpeakKOR?"))
@@ -223,12 +226,12 @@ class MainActivity : AppCompatActivity() {
                     Log.d("test001", "데이터 보냄");
                     Log.d("test001", "데이터 받음"+ mInput?.read());
                     Thread.sleep(3000)
-                    mOutput?.write(("time\n").toByteArray())
-                    Log.d("test001", "데이터 보냄");
-                    Thread.sleep(3000)
-                    mOutput?.write(("print\n").toByteArray())
-                    Log.d("test001", "데이터 보냄");
-                    Thread.sleep(3000)
+                    //mOutput?.write(("time\n").toByteArray())
+                    //Log.d("test001", "데이터 보냄");
+                    //Thread.sleep(3000)
+                    //mOutput?.write(("print\n").toByteArray())
+                    //Log.d("test001", "데이터 보냄");
+                    //Thread.sleep(3000)
                     //mOutput?.write(("q").toByteArray())
                     //Log.d("test001", "데이터 보냄");
                     //Thread.sleep(3000)
@@ -243,24 +246,8 @@ class MainActivity : AppCompatActivity() {
             }
         }).start()
 
-
-        //거리 재는 스레드
-        /*
-        Thread(Runnable {
-            while(true){
-                if (bluetoothAdapter?.isDiscovering == true) {
-                    bluetoothAdapter?.cancelDiscovery();
-                    Log.d("test001", "BLUE 버튼 클릭 2-1");
-                }
-                bluetoothAdapter?.startDiscovery();
-                Thread.sleep(5000)
-            }
-        }).start()
-        */
     }
 
-    fun distanse(){
-    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
