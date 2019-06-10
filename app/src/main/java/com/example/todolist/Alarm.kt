@@ -29,7 +29,7 @@ class Alarm : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.content_alarm)
+        setContentView(R.layout.activity_alarm)
 
         time_picker.setIs24HourView(true)
 
@@ -73,7 +73,7 @@ class Alarm : AppCompatActivity() {
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-            .hideSoftInputFromWindow( relativelayout.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+            ?.hideSoftInputFromWindow( relativelayout.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
         relativelayout.requestFocus()
         return super.onTouchEvent(event)
     }
