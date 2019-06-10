@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothSocket
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothDevice
+import android.graphics.Color
 import android.widget.Button
 import java.io.InputStream
 import java.io.OutputStream
@@ -45,6 +46,10 @@ class MainActivity : AppCompatActivity() {
     var mOutput : OutputStream? = null
     var mInput : InputStream?= null
 
+
+
+    var today_study_time = 0   //하룻동안 공부 시간
+    var studing_state = false   //false:공부안함  true: 공부함
     var distanceTimer : TimerTask ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +75,17 @@ class MainActivity : AppCompatActivity() {
                         rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
                         Log.d("test001", "장치이름 : " + device?.name + " RSSI : " + rssi)
                         distance.setText("거리 : "+rssi)
+                        if(rssi>-50){
+                            studing_state = true
+                        }else{
+                            studing_state = false
+                        }
+
+                        //블루투스 끊겼는지확인?
+                        /*if(mBtSocket == null)
+                        {
+                            bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151));
+                        }*/
 
                         //거리 데이터 보내기
                         mOutput?.write(("rssi\n"+rssi+"\n").toByteArray())
@@ -84,9 +100,14 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
 
-        val count = object : CountDownTimer(1000000, 1000) {
+        //올려 뒀을때 타이머!
+        val count = object : CountDownTimer(10000000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                timer.setText(""+millisUntilFinished/60000+":"+millisUntilFinished%60000/1000)
+                if (studing_state == true) {
+                    today_study_time++
+                }
+                //timer.setText(""+millisUntilFinished/60000+":"+millisUntilFinished%60000/1000)
+                timer.setText("" + today_study_time / 60 + ":" + today_study_time % 60)
             }
 
             override fun onFinish() {
@@ -94,8 +115,15 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
 
-        //블루투스 연결
-        bluetoothConnection()
+        distanceCheck()
+
+
+
+
+        bluetooth_led.setOnClickListener(View.OnClickListener {
+            //블루투스 연결
+            bluetoothConnection()
+        })
 
         Blue.setOnClickListener(View.OnClickListener {
             Log.d("test001", "BLUE 버튼 클릭1");
@@ -164,11 +192,10 @@ class MainActivity : AppCompatActivity() {
         }).start()
     }
 
-
     fun bluetoothConnection() {
         //블루투스 연결
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        if(bluetoothAdapter == null) {
+        if(bluetoothAdapter != null) {
             Log.d("test001", "Device does not support BlueTooth")
         }
         if(!bluetoothAdapter!!.isEnabled){
@@ -208,6 +235,11 @@ class MainActivity : AppCompatActivity() {
                 // 소켓을 연결한다.
                 Log.d("test001", "연결 중");
                 mBtSocket?.connect()
+                if(mBtSocket != null)
+                {
+                    bluetooth_led.setColorFilter(Color.argb(255, 0, 45, 219));
+                }
+
                 Log.d("test001", "연결 완료");
                 //Thread.sleep(2000);
                 // 입출력을 위한 스트림 오브젝트를 얻는다
