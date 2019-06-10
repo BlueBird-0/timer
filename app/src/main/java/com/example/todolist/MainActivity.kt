@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothSocket
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothDevice
+import android.widget.Button
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.concurrent.schedule
@@ -50,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         toolbar.setTitle("")
+        toolbar.hideOverflowMenu()
         setSupportActionBar(toolbar)
 
         val mReceiver = object : BroadcastReceiver() {
@@ -105,7 +107,11 @@ class MainActivity : AppCompatActivity() {
             Log.d("test001", "BLUE 버튼 클릭3");
         })
 
-
+        var Alarm_btn = findViewById<Button>(R.id.Alram)
+        Alarm_btn.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this,Alarm::class.java)
+            startActivity(intent)
+        })
 
         btn_calendar.setOnClickListener(View.OnClickListener {
             val intent = Intent(this,BarGraph::class.java)
@@ -248,6 +254,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        return false
+    }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
