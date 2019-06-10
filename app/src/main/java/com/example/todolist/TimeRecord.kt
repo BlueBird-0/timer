@@ -2,7 +2,6 @@ package com.example.todolist
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
-import org.jetbrains.anko.db.*
 import android.widget.Toast
 import android.R
 import android.os.Bundle
@@ -15,8 +14,8 @@ import android.widget.Button
 
 class TimeRecord : AppCompatActivity() {
 
-    var data1 = "국어, 2019.06.07.12.43"
-    var data2 = "국어, 2019.06.07, "
+    var data1 = "국어, 2019.06.07, 38"
+    var data2 = "수학, 2019.06.07, 52"
 
 
     // 상수 관련

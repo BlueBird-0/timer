@@ -1,3 +1,7 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="chart_title_text_size">18sp</dimen>
+    <dimen name="chart_width">300dp</dimen>
+    <dimen name="inside_title_text_size">20sp</dimen>
+    <dimen name="input_linear_padding">16dp</dimen>
 </resources>
