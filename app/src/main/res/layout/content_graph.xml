@@ -7,6 +7,13 @@
                                              android:layout_height="match_parent"
                                              tools:context=".BarGraph">
     <!-- Title above the chart -->
+    <EditText
+            android:id="@+id/burned2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/burn"
+            android:inputType="number" tools:layout_editor_absoluteY="667dp" tools:layout_editor_absoluteX="31dp"/>
     <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
@@ -95,7 +102,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:hint="@string/burn"
-                android:inputType="number" />
+                android:inputType="number" tools:layout_editor_absoluteY="642dp" tools:layout_editor_absoluteX="18dp"/>
 
         <Button
                 android:layout_width="0dp"
@@ -119,6 +126,11 @@
                 android:onClick="addConsumed"
                 android:text="@string/add" />
     </LinearLayout>
+    <Button
+            android:text="ADD"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" tools:layout_editor_absoluteY="667dp"
+            tools:layout_editor_absoluteX="113dp" android:id="@+id/button2"/>
 
 
 </android.support.constraint.ConstraintLayout>

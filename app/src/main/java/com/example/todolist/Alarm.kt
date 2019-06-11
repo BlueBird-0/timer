@@ -12,6 +12,7 @@ import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import kotlinx.android.synthetic.main.content_alarm.*
+import kotlinx.android.synthetic.main.content_graph.*
 import java.lang.reflect.Array.set
 import java.util.*
 import java.util.Calendar
@@ -73,8 +74,8 @@ class Alarm : AppCompatActivity() {
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-            ?.hideSoftInputFromWindow( relativelayout.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
-        relativelayout.requestFocus()
+            ?.hideSoftInputFromWindow( constraintLayout.windowToken, InputMethodManager.HIDE_NOT_ALWAYS)
+        constraintLayout.requestFocus()
         return super.onTouchEvent(event)
     }
 
