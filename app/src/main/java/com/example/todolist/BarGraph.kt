@@ -43,19 +43,17 @@ class BarGraph : AppCompatActivity(){
     fun updateChart() {
         // Update the text in a center of the chart:
 
-        Log.d("test003","호출직후")
+
         number_of_calories.setText(calsBurned.toString() + " / " + calsConsumed.toString())
 
-        Log.d("test003","셋텍스트후")
+
         // Calculate the slice size and update the pie chart:
         val d = calsBurned.toDouble() / calsConsumed.toDouble()
 
-        Log.d("test003","D넣기")
         val progress = (d * 100).toInt()
 
-        Log.d("test003","셋 프로그레스 전")
         stats_progressbar.setProgress(progress)
 
-        Log.d("test003","셋 프로그레스 후")
+
     }
 }

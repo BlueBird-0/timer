@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity() {
         var Alarm_btn = findViewById<Button>(R.id.Alram)
         Alarm_btn.setOnClickListener(View.OnClickListener {
             val intent = Intent(this,Alarm::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, 0)
         })
 
         btn_calendar.setOnClickListener(View.OnClickListener {
@@ -305,5 +305,36 @@ class MainActivity : AppCompatActivity() {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        when(requestCode){
+            0-> {
+                var result = data?.getLongExtra("결과", 0);
+                Log.d("test003",""+result+" 차이 ")
+
+                if (result != null) {
+                    val count = object : CountDownTimer(result, 5000) {
+                        override fun onTick(millisUntilFinished: Long) {
+                        }
+
+                        override fun onFinish() {
+                            mOutput?.write(("alarm\n").toByteArray())
+                            Log.d("test001", "데이터 보냄");
+                            Log.d("test001", "데이터 받음" + mInput?.read());
+                            Thread.sleep(3000)
+                            //mOutput?.write(("time\n").toByteArray())
+                            //Log.d("test001", "데이터 보냄");
+
+                        }
+                    }.start()
+                }
+            }
+
+
+        }
+
+
     }
 }
