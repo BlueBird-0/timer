@@ -14,6 +14,10 @@ import java.lang.String.valueOf
 
 
 class BarGraph : AppCompatActivity(){
+    var kor = 3.3
+    var mat = 1.2
+    var eng = 2.0
+
 
     var calsBurned = 0
     var calsConsumed = 0
