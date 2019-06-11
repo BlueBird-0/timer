@@ -145,6 +145,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this,BarGraph::class.java)
             startActivity(intent)
         })
+
+        btn_option.setOnClickListener(View.OnClickListener {
+            val intent = Intent(this, SettingActivity::class.java)
+            startActivity(intent)})
+
+
+
+
     }
 
     fun distanceCheck(){
