@@ -30,6 +30,7 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothDevice
 import android.graphics.Color
+import android.support.v4.app.ActivityCompat.startActivityForResult
 import android.widget.Button
 import java.io.InputStream
 import java.io.OutputStream
@@ -40,7 +41,7 @@ private const val SCAN_PERIOD : Long = 10000
 class MainActivity : AppCompatActivity() {
 
     var socket : BluetoothSocket ?= null
-    var bluetoothAdapter : BluetoothAdapter ?= null
+    val bluetoothAdapter : BluetoothAdapter ?= BluetoothAdapter.getDefaultAdapter()
     private val MY_UUID_SECURE = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     var mBtSocket : BluetoothSocket? = null
     var mOutput : OutputStream? = null
@@ -61,39 +62,42 @@ class MainActivity : AppCompatActivity() {
 
         val mReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                distanceCheck()
                 //val sendString = intent?.getStringExtra("sendString")
                 //Log.d("test001", sendString)
                 //val toast = Toast.makeText(applicationContext, "리시버 실행", Toast.LENGTH_LONG).show()
 
-                val action = intent?.action
-                var rssi : Short
-                Log.d("test001", "리시버 실행 (action):"+intent?.action)
-                if(BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    //var device = intent?.getParcelableArrayExtra(BluetoothDevice.EXTRA_DEVICE)
-                    val device :BluetoothDevice? = intent?.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    if(device?.name.equals("raspberrypi")) {
-                        rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
-                        Log.d("test001", "장치이름 : " + device?.name + " RSSI : " + rssi)
-                        distance.setText("거리 : "+rssi)
-                        if(rssi>-50){
-                            studing_state = true
-                        }else{
-                            studing_state = false
+                Thread(Runnable {
+                        val action = intent?.action
+                        //Log.d("test001", "리시버 실행 (action):"+intent?.action)
+                        if(BluetoothDevice.ACTION_FOUND.equals(action)) {
+                            val device :BluetoothDevice? = intent?.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                            //Log.d("test001", "검색 : "+device?.name)
+                            if(device?.name.equals("raspberrypi")) {
+                                bluetoothAdapter?.cancelDiscovery()
+                                val rssi = intent?.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE)
+                                Log.d("test001", "장치이름 : " + device?.name + " RSSI : " + rssi)
+
+                                runOnUiThread(Runnable {
+                                    distance.setText("거리 : "+rssi)
+                                })
+                                if(rssi>-50){
+                                    studing_state = true
+                                }else{
+                                    studing_state = false
+                                }
+
+                                //블루투스 끊겼는지확인?
+                                /*if(mBtSocket == null)
+                                {
+                                    bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151));
+                                }*/
+
+                                //거리 데이터 보내기
+                                mOutput?.write(("rssi\n"+rssi+"\n").toByteArray())
+                            }
                         }
-
-                        //블루투스 끊겼는지확인?
-                        /*if(mBtSocket == null)
-                        {
-                            bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151));
-                        }*/
-
-                        //거리 데이터 보내기
-                        mOutput?.write(("rssi\n"+rssi+"\n").toByteArray())
-
-                        distanceCheck()
-                    }
-
-                }
+                }).start()
             }
         }
         Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state);
@@ -115,24 +119,25 @@ class MainActivity : AppCompatActivity() {
             }
         }.start()
 
-        distanceCheck()
-
-
-
-
         bluetooth_led.setOnClickListener(View.OnClickListener {
             //블루투스 연결
             bluetoothConnection()
         })
 
-        Blue.setOnClickListener(View.OnClickListener {
-            Log.d("test001", "BLUE 버튼 클릭1");
-            if (bluetoothAdapter?.isDiscovering == true) {
-                bluetoothAdapter?.cancelDiscovery();
-                Log.d("test001", "BLUE 버튼 클릭2");
+
+        //시간마다 distanceCheck 실행!!
+        Thread(Runnable {
+            while(true) {
+                if(bluetoothAdapter?.isDiscovering == false) {
+                    Log.d("test001", "다시시작")
+                    distanceCheck()
+                }
+                Thread.sleep(300)
             }
-            bluetoothAdapter?.startDiscovery();
-            Log.d("test001", "BLUE 버튼 클릭3");
+        }).start()
+
+        Blue.setOnClickListener(View.OnClickListener {
+            distanceCheck()
         })
 
         var Alarm_btn = findViewById<Button>(R.id.Alram)
@@ -148,17 +153,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun distanceCheck(){
-        distanceTimer?.cancel()
-        //10초가 지나면 자동으로 다시 검색
-        distanceTimer = Timer("DistanceCheckTimer", false).schedule(10000){
-            Log.d("test001", "timer start!!!");
-            distanceCheck()
-        }
-
-        //블루투스 검색 시작
         if (bluetoothAdapter?.isDiscovering == true) {
             bluetoothAdapter?.cancelDiscovery();
-            Log.d("test001", "다시 검색");
         }
         bluetoothAdapter?.startDiscovery();
     }
@@ -194,7 +190,7 @@ class MainActivity : AppCompatActivity() {
 
     fun bluetoothConnection() {
         //블루투스 연결
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+//        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if(bluetoothAdapter != null) {
             Log.d("test001", "Device does not support BlueTooth")
         }
