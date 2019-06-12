@@ -41,6 +41,7 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import java.io.InputStream
 import java.io.OutputStream
+import java.time.Year
 import kotlin.concurrent.schedule
 
 
@@ -130,13 +131,34 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
 
         //올려 뒀을때 타이머!
+        var state_checker:Int = 0
         val count = object : CountDownTimer(10000000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 if (studing_state == true) {
                     today_study_time++
+                    state_checker = 1
                 }
-                //timer.setText(""+millisUntilFinished/60000+":"+millisUntilFinished%60000/1000)
-                timer.setText("" + today_study_time / 60 + ":" + today_study_time % 60)
+
+                if(studing_state==false){
+                    if(state_checker==1){
+                        //timer.setText(""+millisUntilFinished/60000+":"+millisUntilFinished%60000/1000)
+                        timer.setText("" + today_study_time / 60 + ":" + today_study_time % 60)
+
+
+                        fun recordTime () : String{
+                            var recording = ""+Calendar.YEAR+":"+Calendar.MONTH+":"+Calendar.DAY_OF_MONTH+"_"+today_study_time
+                            return recording
+                        }
+                        var  studytime = Intent()
+                        studytime.putExtra("공부시간",recordTime())
+                        setResult(0,studytime)
+
+                        state_checker==2
+                    }
+                }
+
+                state_checker==0
+
             }
 
             override fun onFinish() {
@@ -176,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         Thread(Runnable {
             while(true) {
                 if(bluetoothAdapter?.isDiscovering == false) {
-                    Log.d("test001", "다시시작")
+
                     distanceCheck()
                 }
                 Thread.sleep(300)
