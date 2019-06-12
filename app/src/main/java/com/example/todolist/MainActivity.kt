@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         btn_calendar.setOnClickListener(View.OnClickListener {
-            val intent = Intent(this,BarGraph::class.java)
+            val intent = Intent(this,CalendarActivity::class.java)
             startActivity(intent)
         })
 
