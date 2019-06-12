@@ -14,9 +14,6 @@ import android.widget.Button
 
 class TimeRecord : AppCompatActivity() {
 
-    var data1 = "국어, 2019.06.07, 38"
-    var data2 = "수학, 2019.06.07, 52"
-
 
     // 상수 관련
     internal var dbName = "apList.db" // name of Database;
@@ -46,10 +43,6 @@ class TimeRecord : AppCompatActivity() {
         createTable()
 
         Log.d("test002","테이블생성끝")
-
-        insertData("김소정")
-        insertData("전인학")
-        insertData("이한솔")
 
         selectAll()
     }
