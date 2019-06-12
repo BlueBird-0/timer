@@ -3,6 +3,7 @@ package com.example.todolist
 import android.Manifest
 import android.app.Activity
 import android.app.ListActivity
+import android.app.PendingIntent.getActivity
 import android.bluetooth.*
 import android.content.*
 import android.content.pm.PackageManager
@@ -54,7 +55,6 @@ class MainActivity : AppCompatActivity() {
     var mBtSocket : BluetoothSocket? = null
     var mOutput : OutputStream? = null
     var mInput : InputStream?= null
-
 
 
     var today_study_time = 0   //하룻동안 공부 시간
@@ -128,6 +128,8 @@ class MainActivity : AppCompatActivity() {
         }
         Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state)
 
+
+        //MainActivity.unregisterReceiver(broadcastReceiver);
         registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
 
         //올려 뒀을때 타이머!
@@ -206,7 +208,10 @@ class MainActivity : AppCompatActivity() {
         }).start()
 
         Blue.setOnClickListener(View.OnClickListener {
-            distanceCheck()
+            //distanceCheck()
+
+            mOutput?.write(("alarm\n").toByteArray())
+            Log.d("test001", "데이터 보냄")
         })
 
         var Alarm_btn = findViewById<Button>(R.id.Alram)
@@ -311,16 +316,19 @@ class MainActivity : AppCompatActivity() {
                 mBtSocket?.connect()
                 if(mBtSocket != null)
                 {
-                    bluetooth_led.setColorFilter(Color.argb(255, 0, 45, 219))
+                    runOnUiThread(Runnable {
+                        bluetooth_led.setColorFilter(Color.argb(255, 0, 45, 219))
+                    })
                 }
 
                 Log.d("test001", "연결 완료")
                 bluetoothState = 2
-                Toast.makeText(applicationContext, "BLUE connect!", Toast.LENGTH_SHORT).show()
+                runOnUiThread(Runnable {
+                    Toast.makeText(applicationContext, "BLUE connect!", Toast.LENGTH_SHORT).show()
+                })
                 // 입출력을 위한 스트림 오브젝트를 얻는다
 
                 mInput = mBtSocket?.getInputStream()
-
                 mOutput = mBtSocket?.getOutputStream()
 
                 while (true) {
@@ -339,8 +347,8 @@ class MainActivity : AppCompatActivity() {
                     Log.d("test001", "데이터 보냄")
                     Log.d("test001", "데이터 받음"+ mInput?.read())
                     Thread.sleep(3000)
-                    //mOutput?.write(("time\n").toByteArray())
-                    //Log.d("test001", "데이터 보냄")
+                    mOutput?.write(("alarm\n").toByteArray())
+                    Log.d("test001", "데이터 보냄")
                     //Thread.sleep(3000)
                     //mOutput?.write(("print\n").toByteArray())
                     //Log.d("test001", "데이터 보냄")
