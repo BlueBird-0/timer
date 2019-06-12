@@ -1,5 +1,7 @@
 package com.example.todolist
 
+import android.Manifest
+import android.app.Activity
 import android.app.ListActivity
 import android.bluetooth.*
 import android.content.*
@@ -8,7 +10,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.support.design.widget.Snackbar
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -30,8 +32,13 @@ import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothDevice
 import android.graphics.Color
+import android.os.Build
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityCompat.startActivityForResult
+import android.support.v4.content.ContextCompat
 import android.widget.Button
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.TedPermission
 import java.io.InputStream
 import java.io.OutputStream
 import kotlin.concurrent.schedule
@@ -53,12 +60,30 @@ class MainActivity : AppCompatActivity() {
     var studing_state = false   //false:공부안함  true: 공부함
     var distanceTimer : TimerTask ?= null
 
+    var bluetoothState = 0   //0 = 연결 안됨, 1 = 연결 중, 2 = 연결
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         toolbar.setTitle("")
         toolbar.hideOverflowMenu()
         setSupportActionBar(toolbar)
+
+        val permissionListener :PermissionListener = object : PermissionListener {
+            override fun onPermissionGranted() {
+                //Toast.makeText(applicationContext, "권한 허가", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onPermissionDenied(deniedPermissions: java.util.ArrayList<String>?) {
+                Toast.makeText(applicationContext, "권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+        TedPermission.with(this)
+            .setPermissionListener(permissionListener)
+            .setDeniedMessage("거리 측정을 하기 위해서 권한이 필요합니다.")
+            .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION)
+            .check()
 
         val mReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
@@ -90,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                                 //블루투스 끊겼는지확인?
                                 /*if(mBtSocket == null)
                                 {
-                                    bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151));
+                                    bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151))
                                 }*/
 
                                 //거리 데이터 보내기
@@ -100,7 +125,7 @@ class MainActivity : AppCompatActivity() {
                 }).start()
             }
         }
-        Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state);
+        Log.d("test001", "블루투스 상태 : "+ BluetoothAdapter.getDefaultAdapter().state)
 
         registerReceiver(mReceiver, IntentFilter(BluetoothDevice.ACTION_FOUND))
 
@@ -115,13 +140,35 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onFinish() {
-                timer.setText("done!");
+                timer.setText("done!")
             }
         }.start()
 
+
         bluetooth_led.setOnClickListener(View.OnClickListener {
-            //블루투스 연결
-            bluetoothConnection()
+            if(bluetoothState == 1 || bluetoothState == 2) {
+                bluetoothState = 0
+                runOnUiThread(Runnable {  bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151))  })
+                bluetoothAdapter?.disable()
+                Toast.makeText(applicationContext, "BLUE close", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                Toast.makeText(applicationContext, "BLUE search...", Toast.LENGTH_SHORT).show()
+                Thread(Runnable {
+                    bluetoothState = 1       //연결중 상태
+                    Log.d("test001", bluetoothState.toString() + "ㅇㅇㅇㅇㅇㅇ")
+
+                    while (bluetoothState == 1) {
+                        runOnUiThread(Runnable { bluetooth_led.setColorFilter(Color.argb(255, 242, 203, 97)) })
+                        Thread.sleep(300)
+                        runOnUiThread(Runnable { bluetooth_led.setColorFilter(Color.argb(255, 151, 151, 151)) })
+                        Thread.sleep(300)
+                    }
+                }).start()
+                //연결 돼있으면 연결 해제
+                //블루투스 연결
+                bluetoothConnection()
+            }
         })
 
 
@@ -154,9 +201,9 @@ class MainActivity : AppCompatActivity() {
 
     fun distanceCheck(){
         if (bluetoothAdapter?.isDiscovering == true) {
-            bluetoothAdapter?.cancelDiscovery();
+            bluetoothAdapter?.cancelDiscovery()
         }
-        bluetoothAdapter?.startDiscovery();
+        bluetoothAdapter?.startDiscovery()
     }
 
     fun createServer(){
@@ -200,20 +247,20 @@ class MainActivity : AppCompatActivity() {
         }
 
         //기기 연결
-        Log.d("test001", "기기 연결 해볼까?");
+        Log.d("test001", "기기 연결 해볼까?")
         var pairedDevices : Set<BluetoothDevice> = bluetoothAdapter!!.bondedDevices
         var arrayAdapter = ArrayList<String>()
         if(pairedDevices.size > 0) {
-            Log.d("test001", "if문에 걸렸어");
+            Log.d("test001", "if문에 걸렸어")
             for(device in pairedDevices) {
                 arrayAdapter.add(device.name+ "\n"+device.address)
             }
         }
         for(adapter in arrayAdapter)
-            Log.d("test001", adapter);
+            Log.d("test001", adapter)
 
         try{
-            bluetoothAdapter!!.startDiscovery()
+            //bluetoothAdapter!!.startDiscovery()
             var heroDevice = bluetoothAdapter!!.getRemoteDevice("B8:27:EB:5F:37:48")
             mBtSocket = heroDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
             mBtSocket =
@@ -222,22 +269,24 @@ class MainActivity : AppCompatActivity() {
 
 
         } catch(e : Exception) {
-            e.printStackTrace();
+            bluetoothState = 0
+            e.printStackTrace()
             Log.d("test001", "아 여기도 에러가 떳어요 : "+e.printStackTrace())
         }
         Thread(Runnable {
-            try {
 
+            try {
                 // 소켓을 연결한다.
-                Log.d("test001", "연결 중");
+                Log.d("test001", "연결 중")
                 mBtSocket?.connect()
                 if(mBtSocket != null)
                 {
-                    bluetooth_led.setColorFilter(Color.argb(255, 0, 45, 219));
+                    bluetooth_led.setColorFilter(Color.argb(255, 0, 45, 219))
                 }
 
-                Log.d("test001", "연결 완료");
-                //Thread.sleep(2000);
+                Log.d("test001", "연결 완료")
+                bluetoothState = 2
+                Toast.makeText(applicationContext, "BLUE connect!", Toast.LENGTH_SHORT).show()
                 // 입출력을 위한 스트림 오브젝트를 얻는다
 
                 mInput = mBtSocket?.getInputStream()
@@ -257,28 +306,34 @@ class MainActivity : AppCompatActivity() {
 
 
                     mOutput?.write(("r\n").toByteArray())
-                    Log.d("test001", "데이터 보냄");
-                    Log.d("test001", "데이터 받음"+ mInput?.read());
+                    Log.d("test001", "데이터 보냄")
+                    Log.d("test001", "데이터 받음"+ mInput?.read())
                     Thread.sleep(3000)
                     //mOutput?.write(("time\n").toByteArray())
-                    //Log.d("test001", "데이터 보냄");
+                    //Log.d("test001", "데이터 보냄")
                     //Thread.sleep(3000)
                     //mOutput?.write(("print\n").toByteArray())
-                    //Log.d("test001", "데이터 보냄");
+                    //Log.d("test001", "데이터 보냄")
                     //Thread.sleep(3000)
                     //mOutput?.write(("q").toByteArray())
-                    //Log.d("test001", "데이터 보냄");
+                    //Log.d("test001", "데이터 보냄")
                     //Thread.sleep(3000)
 
-                    break;
+                    break
                 }
 
             } catch (e: Exception) {
                 Log.d("test001", "에러 또떠 ")
+                bluetoothState = 0
                 e.printStackTrace()
 
             }
         }).start()
+
+    }
+
+    private val REQUEST_ACCESS_FINE_LOCATION = 1000
+    fun permissionCehck(){
 
     }
 
@@ -307,7 +362,7 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         when(requestCode){
             0-> {
-                var result = data?.getLongExtra("결과", 0);
+                var result = data?.getLongExtra("결과", 0)
                 Log.d("test003",""+result+" 차이 ")
 
                 if (result != null) {
@@ -317,12 +372,11 @@ class MainActivity : AppCompatActivity() {
 
                         override fun onFinish() {
                             mOutput?.write(("alarm\n").toByteArray())
-                            Log.d("test001", "데이터 보냄");
-                            Log.d("test001", "데이터 받음" + mInput?.read());
+                            Log.d("test001", "데이터 보냄")
+                            Log.d("test001", "데이터 받음" + mInput?.read())
                             Thread.sleep(3000)
                             //mOutput?.write(("time\n").toByteArray())
-                            //Log.d("test001", "데이터 보냄");
-
+                            //Log.d("test001", "데이터 보냄")
                         }
                     }.start()
                 }

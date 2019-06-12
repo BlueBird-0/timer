@@ -39,5 +39,5 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-script-runtime:1.3.21"
     implementation 'com.ognev.kotlin.agendacalendarview:kotlin-agendacalendarview:1.0'
     implementation 'com.github.applikeysolutions:cosmocalendar:1.0.4'
-
+    implementation 'gun0912.ted:tedpermission:2.0.0'
 }
