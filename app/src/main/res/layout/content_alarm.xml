@@ -69,6 +69,13 @@
             app:srcCompat="@drawable/ic_cancel"
             android:layout_marginStart="30dp" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginBottom="30dp" app:layout_constraintBottom_toBottomOf="parent"/>
+    <Button
+            android:text="Test) 즉시 알람"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/test_alarm" app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" android:layout_marginBottom="20dp"/>
 
 
 </android.support.constraint.ConstraintLayout>

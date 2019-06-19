@@ -10,6 +10,7 @@ import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MotionEvent
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import kotlinx.android.synthetic.main.content_alarm.*
@@ -93,12 +94,20 @@ class Alarm : AppCompatActivity() {
 
            Log.d("test003","선택시간 밀리초:"+ Calendar.getInstance().apply {  time_picker.hour
                  time_picker.minute}.timeInMillis)
-
+            var eventually = timePicker_mil - current_time
+            if((timePicker_mil - current_time)<0){
+                eventually += 86400000
+            }
+            Log.d("test003",""+eventually.toString())
 
             //데이터 전송
             var  data = Intent()
-            data.putExtra("결과",(timePicker_mil - current_time))
+            eventually += 1000
+            data.putExtra("결과",(eventually))
             setResult(0,data)
+
+            Toast.makeText(this, ""+(eventually/1000/60).toString()+"분 후 알람이 울립니다.", Toast.LENGTH_SHORT).show()
+
             finish()
         }
 
@@ -110,6 +119,17 @@ class Alarm : AppCompatActivity() {
             Toast.makeText(applicationContext, "CANCEL!!", Toast.LENGTH_SHORT).show()
         }
 
+
+        test_alarm.setOnClickListener(View.OnClickListener {
+            //데이터 전송
+            var  data = Intent()
+            var eventually = 1000
+            data.putExtra("결과",(eventually))
+            setResult(0,data)
+
+            Toast.makeText(this, ""+(eventually/1000/60).toString()+"분 후 알람이 울립니다.", Toast.LENGTH_SHORT).show()
+            finish()
+        })
     }
 
 //    override fun onTouchEvent(event: MotionEvent?): Boolean {

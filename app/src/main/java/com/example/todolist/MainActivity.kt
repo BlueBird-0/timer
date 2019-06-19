@@ -42,6 +42,7 @@ import com.gun0912.tedpermission.PermissionListener
 import com.gun0912.tedpermission.TedPermission
 import java.io.InputStream
 import java.io.OutputStream
+import java.text.SimpleDateFormat
 import java.time.Year
 import kotlin.concurrent.schedule
 
@@ -105,9 +106,9 @@ class MainActivity : AppCompatActivity() {
                                 Log.d("test001", "장치이름 : " + device?.name + " RSSI : " + rssi)
 
                                 runOnUiThread(Runnable {
-                                    distance.setText("거리 : "+rssi)
+                                    distance.setText("DISTANCE : "+rssi)
                                 })
-                                if(rssi>-50){
+                                if(rssi>-60){
                                     studing_state = true
                                 }else{
                                     studing_state = false
@@ -138,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             override fun onTick(millisUntilFinished: Long) {
                 if (studing_state == true) {
                     today_study_time++
+                    timer.setText("" + today_study_time / 60 + ":" + today_study_time % 60)
                     state_checker = 1
                 }
 
@@ -155,11 +157,11 @@ class MainActivity : AppCompatActivity() {
                         studytime.putExtra("공부시간",recordTime())
                         setResult(0,studytime)
 
-                        state_checker==2
+                        state_checker=2
                     }
                 }
 
-                state_checker==0
+                state_checker=0
 
             }
 
@@ -207,13 +209,6 @@ class MainActivity : AppCompatActivity() {
             }
         }).start()
 
-        Blue.setOnClickListener(View.OnClickListener {
-            //distanceCheck()
-
-            mOutput?.write(("alarm\n").toByteArray())
-            Log.d("test001", "데이터 보냄")
-        })
-
         var Alarm_btn = findViewById<Button>(R.id.Alram)
         Alarm_btn.setOnClickListener(View.OnClickListener {
             val intent = Intent(this,Alarm::class.java)
@@ -221,7 +216,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         btn_calendar.setOnClickListener(View.OnClickListener {
-            val intent = Intent(this,BarGraph::class.java)
+            val intent = Intent(this, TimeRecord::class.java)
             startActivity(intent)
         })
 
@@ -296,7 +291,7 @@ class MainActivity : AppCompatActivity() {
 
         try{
             //bluetoothAdapter!!.startDiscovery()
-            var heroDevice = bluetoothAdapter!!.getRemoteDevice("B8:27:EB:5F:37:48")
+            var heroDevice = bluetoothAdapter!!.getRemoteDevice("B8:27:EB:1B:27:9E")
             mBtSocket = heroDevice.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
             mBtSocket =
                 heroDevice.javaClass.getMethod("createRfcommSocket", *arrayOf<Class<*>>(Int::class.javaPrimitiveType!!))
@@ -345,10 +340,14 @@ class MainActivity : AppCompatActivity() {
 
                     mOutput?.write(("r\n").toByteArray())
                     Log.d("test001", "데이터 보냄")
-                    Log.d("test001", "데이터 받음"+ mInput?.read())
-                    Thread.sleep(3000)
-                    mOutput?.write(("alarm\n").toByteArray())
-                    Log.d("test001", "데이터 보냄")
+                    //Log.d("test001", "데이터 받음"+ mInput?.read())
+                    var ca = Calendar.getInstance()
+                    ca.add(Calendar.MINUTE, 2)
+                    var date = SimpleDateFormat("MMddHHmmyyyy").format(ca.time)
+                    mOutput?.write(("T_set\n"+date+"\n").toByteArray())
+                    Log.d("test001", "데이터 보냄, 현재시간 : "+ date )
+
+
                     //Thread.sleep(3000)
                     //mOutput?.write(("print\n").toByteArray())
                     //Log.d("test001", "데이터 보냄")
@@ -410,11 +409,8 @@ class MainActivity : AppCompatActivity() {
 
                         override fun onFinish() {
                             mOutput?.write(("alarm\n").toByteArray())
-                            Log.d("test001", "데이터 보냄")
-                            Log.d("test001", "데이터 받음" + mInput?.read())
-                            Thread.sleep(3000)
-                            //mOutput?.write(("time\n").toByteArray())
-                            //Log.d("test001", "데이터 보냄")
+                            Log.d("test003", "데이터 보냄")
+
                         }
                     }.start()
                 }
